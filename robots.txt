@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Disallow: /mentions-legales
+Disallow: /politique-confidentialite
+
+Sitemap: https://accouvreur-couverture-peinture-renovation.fr/sitemap.xml

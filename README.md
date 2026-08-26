@@ -37,6 +37,30 @@ et depuis les résultats Google.
    `CONFIG.insurer` et `CONFIG.policyNumber` (mentions légales).
 4. Soumettre `sitemap.xml` dans la Google Search Console.
 
+## Numéros de téléphone
+
+- **Principal : 06 59 30 49 50** — porte tous les boutons d'appel du site
+  (header, hero, barre mobile, page urgence, CTA, footer).
+- Secondaire : 02 55 56 48 63 — affiché sur les pages contact, urgence et dans le footer.
+- Autre ligne : 06 81 96 41 80 — page contact uniquement.
+  Mettre `CONFIG.phoneAlt` à `""` pour la retirer du site.
+
+Tout se change dans `CONFIG`, en haut du `<script>` de `index.html`.
+
+## Horaires
+
+Affichés : **6h – 20h** (site + footer + page contact).
+
+⚠️ `CONFIG.hoursDays` est encore vide : les horaires sont visibles par les visiteurs
+mais **pas déclarés à Google**. Renseigner l'un de ces trois codes pour activer
+les données structurées `openingHoursSpecification` :
+
+- `"Mo-Su"` → tous les jours
+- `"Mo-Sa"` → du lundi au samedi
+- `"Mo-Fr"` → du lundi au vendredi
+
+Les horaires doivent être identiques sur la fiche Google Business Profile.
+
 ## Informations à confirmer avant publication
 
 - Nom commercial : le logo indique « AC PRO COUVERTURE », le site affiche « AC Couvreur ».
