@@ -31,9 +31,8 @@ et depuis les résultats Google.
 
 1. Remplacer le domaine dans `CONFIG.domain` (en haut du `<script>` de `index.html`),
    dans `robots.txt` et dans `sitemap.xml`.
-2. Renseigner `CONFIG.formEndpoint` (Web3Forms, Formspree…) pour activer le formulaire.
-   Tant qu'il est vide, le formulaire l'indique clairement au visiteur.
-3. Renseigner `CONFIG.email`, `CONFIG.hours`, `CONFIG.gbp` (fiche Google),
+2. Formulaire déjà connecté à Web3Forms.
+3. Renseigner `CONFIG.hours`, `CONFIG.gbp` (fiche Google),
    `CONFIG.insurer` et `CONFIG.policyNumber` (mentions légales).
 4. Soumettre `sitemap.xml` dans la Google Search Console.
 
@@ -42,8 +41,13 @@ et depuis les résultats Google.
 - **Principal : 06 59 30 49 50** — porte tous les boutons d'appel du site
   (header, hero, barre mobile, page urgence, CTA, footer).
 - Secondaire : 02 55 56 48 63 — affiché sur les pages contact, urgence et dans le footer.
-- Autre ligne : 06 81 96 41 80 — page contact uniquement.
-  Mettre `CONFIG.phoneAlt` à `""` pour la retirer du site.
+- Autre ligne : retirée du site (`CONFIG.phoneAlt` vide).
+
+## Email et formulaire
+
+- Email affiché : **couvertureacpro@gmail.com** (`CONFIG.email`).
+- Formulaire de devis : envoyé par **Web3Forms** (`CONFIG.web3formsKey`), présent sur la page
+  contact et en bas de toutes les pages. Les demandes arrivent sur la boîte liée à la clé.
 
 Tout se change dans `CONFIG`, en haut du `<script>` de `index.html`.
 

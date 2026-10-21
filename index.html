@@ -428,11 +428,10 @@ const CONFIG = {
   mobile: "02 55 56 48 63",
   mobileTel: "+33255564863",
   mobileLabel: "Ligne fixe",
-  /* Ancienne ligne mobile — affichée uniquement sur la page contact.
-     Mettre à "" pour la retirer complètement du site. */
-  phoneAlt: "06 81 96 41 80",
-  phoneAltTel: "+33681964180",
-  email: "",                       // [EMAIL À RENSEIGNER]
+  /* Autre ligne : retirée du site. Mettre un numéro ici pour la réafficher (page contact). */
+  phoneAlt: "",
+  phoneAltTel: "",
+  email: "couvertureacpro@gmail.com",
   hours: "6h – 20h",
   /* Jours d'ouverture — nécessaires aux données structurées Google.
      Valeurs possibles : "Mo-Su" (tous les jours), "Mo-Sa", "Mo-Fr".
@@ -447,7 +446,11 @@ const CONFIG = {
   policyNumber: "",                // [N° DE CONTRAT À RENSEIGNER]
   domain: "https://accouvreur-couverture-peinture-renovation.fr", // domaine canonique unique
   gbp: "",                         // fiche Google Business Profile officielle (sameAs)
-  formEndpoint: ""                 // TODO — CONNECT CONTACT FORM BACKEND (Web3Forms / Formspree / API)
+  /* Formulaire de devis : envoi par Web3Forms (https://web3forms.com).
+     Coller ici la clé d'accès (Access Key) créée avec l'adresse couvertureacpro@gmail.com :
+     les demandes de devis arriveront sur cette boîte mail. */
+  web3formsKey: "749efeca-218c-469d-8d0e-126319fac835",
+  formEndpoint: "https://api.web3forms.com/submit"
 };
 
 /* --------------------------------------------------------------------------
@@ -1200,19 +1203,43 @@ const telBtn = (cls, label) => '<a class="btn ' + cls + '" href="tel:' + CONFIG.
 const devisBtn = (cls, label) => '<a class="btn ' + cls + '" href="#/contact">' + (label || "Demander un devis") + '</a>';
 const photo = (id, cls, eager) => '<img ' + (cls ? 'class="' + cls + '" ' : '') + 'src="' + IMG[id] + '" alt="' + esc((GALLERY.find(g => g.id === id) || {}).alt || "Chantier AC Couvreur") + '" loading="' + (eager ? "eager" : "lazy") + '" decoding="async" width="900" height="1200">';
 
-/* bloc CTA final réutilisable */
+/* formulaire de devis réutilisable : page contact + bas de toutes les pages */
+function devisForm() {
+  const opts = PROJECT_TYPES.map(t => '<option value="' + esc(t) + '">' + esc(t) + '</option>').join("");
+  return '<div class="alert alert--warn" id="formNotice"></div>' +
+    '<form class="form" id="devisForm" novalidate style="margin-top:16px">' +
+    '<input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none">' +
+    '<div class="field"><label for="f-prenom">Prénom <i>*</i></label><input id="f-prenom" name="prenom" type="text" autocomplete="given-name" required><p class="err">Veuillez renseigner votre prénom.</p></div>' +
+    '<div class="field"><label for="f-nom">Nom <i>*</i></label><input id="f-nom" name="nom" type="text" autocomplete="family-name" required><p class="err">Veuillez renseigner votre nom.</p></div>' +
+    '<div class="field"><label for="f-tel">Téléphone <i>*</i></label><input id="f-tel" name="telephone" type="tel" inputmode="tel" autocomplete="tel" required><p class="err">Veuillez renseigner un numéro de téléphone valide.</p></div>' +
+    '<div class="field"><label for="f-mail">Email <i>*</i></label><input id="f-mail" name="email" type="email" autocomplete="email" required><p class="err">Veuillez renseigner une adresse email valide.</p></div>' +
+    '<div class="field full"><label for="f-type">Type de projet <i>*</i></label><select id="f-type" name="projet" required><option value="">Sélectionnez votre projet</option>' + opts + '</select><p class="err">Veuillez sélectionner un type de projet.</p></div>' +
+    '<div class="field full"><label for="f-msg">Votre projet <i>*</i></label><textarea id="f-msg" name="message" required placeholder="Décrivez votre projet : type de toiture, surface approximative, problème constaté..."></textarea><p class="err">Veuillez décrire votre projet en quelques lignes.</p></div>' +
+    '<div class="full"><button class="btn btn--acc btn--lg" type="submit" style="width:100%">Demander mon devis</button>' +
+    '<p class="mu" style="font-size:13px;margin:12px 0 0">Les informations transmises servent uniquement à répondre à votre demande. Voir la <a href="#/politique-confidentialite" style="color:var(--acc)">politique de confidentialité</a>.</p></div>' +
+    '</form>' +
+    '<div class="alert alert--ok" id="formOk" style="margin-top:16px"></div>';
+}
+function devisSection() {
+  return '<section class="sec" id="devis"><div class="wrap" style="max-width:860px"><div class="card rv">' +
+    '<div class="h2r"><h2>Demander un devis</h2><p class="lead">Décrivez votre projet : vous êtes recontacté pour préciser les travaux à réaliser.</p></div>' +
+    devisForm() + '</div></div></section>';
+}
+
+/* bloc CTA final réutilisable (suivi du formulaire de devis) */
 function ctaBlock() {
   return '<section class="cta sec"><img class="cta__img" src="' + IMG["toiture-ardoise-littoral"] + '" alt="" loading="lazy" decoding="async"><div class="cta__veil"></div>' +
     '<div class="wrap cta__in"><div class="rv">' +
     '<h2>Un projet de toiture ?<span>Parlons-en.</span></h2>' +
     '<p class="lead" style="margin-top:18px">Besoin d\'une rénovation, d\'un entretien, d\'une réparation ou d\'une intervention sur votre toiture ? Contactez ' + CONFIG.name + ' pour présenter votre projet.</p>' +
     '<div class="btn-row" style="margin-top:26px">' + devisBtn("btn--acc btn--lg", "Obtenir mon devis") + telBtn("btn--out btn--lg") + '</div></div>' +
-    '<div class="infocard rv">' + infoLines() + '</div></div></section>';
+    '<div class="infocard rv">' + infoLines() + '</div></div></section>' + devisSection();
 }
 function infoLines() {
   return '<div class="info">' + ICON.pin + '<div><strong>' + esc(CONFIG.name) + '</strong><span>' + esc(CONFIG.street) + '<br>' + CONFIG.zip + ' ' + esc(CONFIG.city) + '</span></div></div>' +
     '<div class="info">' + ICON.mobile + '<div><strong>' + esc(CONFIG.phoneLabel) + '</strong><a href="tel:' + CONFIG.phoneTel + '">' + CONFIG.phone + '</a></div></div>' +
     '<div class="info">' + ICON.phone + '<div><strong>' + esc(CONFIG.mobileLabel) + '</strong><a href="tel:' + CONFIG.mobileTel + '">' + CONFIG.mobile + '</a></div></div>' +
+    (CONFIG.email ? '<div class="info">' + ICON.doc + '<div><strong>Email</strong><a href="mailto:' + CONFIG.email + '">' + esc(CONFIG.email) + '</a></div></div>' : '') +
     '<div class="info">' + ICON.clock + '<div><strong>Horaires</strong>' +
     (CONFIG.hours ? '<span>' + esc(CONFIG.hours) + '</span>' : '<span class="ph">HORAIRES À CONFIRMER</span>') + '</div></div>';
 }
@@ -1447,26 +1474,14 @@ function pageFaq() {
 }
 
 function pageContact() {
-  const opts = PROJECT_TYPES.map(t => '<option value="' + esc(t) + '">' + esc(t) + '</option>').join("");
   return heroPage({ h1: "Contact et devis", crumb: "Contact", sub: "Décrivez votre projet de toiture : vous êtes rappelé pour préciser les travaux à réaliser.", img: "souche-etancheite" }) +
     '<section class="sec"><div class="wrap grid2">' +
     '<div class="card rv"><div class="h2r"><h2>Demander un devis</h2></div>' +
-    '<div class="alert alert--warn" id="formNotice"></div>' +
-    '<form class="form" id="devisForm" novalidate style="margin-top:16px">' +
-    '<div class="field"><label for="f-prenom">Prénom <i>*</i></label><input id="f-prenom" name="prenom" type="text" autocomplete="given-name" required><p class="err">Veuillez renseigner votre prénom.</p></div>' +
-    '<div class="field"><label for="f-nom">Nom <i>*</i></label><input id="f-nom" name="nom" type="text" autocomplete="family-name" required><p class="err">Veuillez renseigner votre nom.</p></div>' +
-    '<div class="field"><label for="f-tel">Téléphone <i>*</i></label><input id="f-tel" name="telephone" type="tel" inputmode="tel" autocomplete="tel" required><p class="err">Veuillez renseigner un numéro de téléphone valide.</p></div>' +
-    '<div class="field"><label for="f-mail">Email <i>*</i></label><input id="f-mail" name="email" type="email" autocomplete="email" required><p class="err">Veuillez renseigner une adresse email valide.</p></div>' +
-    '<div class="field full"><label for="f-type">Type de projet <i>*</i></label><select id="f-type" name="projet" required><option value="">Sélectionnez votre projet</option>' + opts + '</select><p class="err">Veuillez sélectionner un type de projet.</p></div>' +
-    '<div class="field full"><label for="f-msg">Votre projet <i>*</i></label><textarea id="f-msg" name="message" required placeholder="Décrivez votre projet : type de toiture, surface approximative, problème constaté..."></textarea><p class="err">Veuillez décrire votre projet en quelques lignes.</p></div>' +
-    '<div class="full"><button class="btn btn--acc btn--lg" type="submit" style="width:100%">Demander mon devis</button>' +
-    '<p class="mu" style="font-size:13px;margin:12px 0 0">Les informations transmises servent uniquement à répondre à votre demande. Voir la <a href="#/politique-confidentialite" style="color:var(--acc)">politique de confidentialité</a>.</p></div>' +
-    '</form>' +
-    '<div class="alert alert--ok" id="formOk" style="margin-top:16px"></div></div>' +
+    devisForm() + '</div>' +
     '<div class="rv"><div class="h2r"><h2>Coordonnées</h2></div>' +
     '<div class="infocard">' + infoLines() +
     (CONFIG.phoneAlt ? '<div class="info">' + ICON.mobile + '<div><strong>Autre ligne</strong><a href="tel:' + CONFIG.phoneAltTel + '">' + CONFIG.phoneAlt + '</a></div></div>' : "") +
-    '<div class="info">' + ICON.doc + '<div><strong>Email</strong><span class="ph">EMAIL À RENSEIGNER</span></div></div></div>' +
+    '</div>' +
     '<div class="btn-row" style="margin-top:20px">' + telBtn("btn--acc", "Appeler AC Couvreur") + '</div>' +
     '<p class="mu" style="margin-top:22px;font-size:14px">Pour une fuite ou une infiltration en cours, l\'appel reste le moyen le plus rapide : <a href="#/urgence-toiture" style="color:var(--acc)">urgence toiture</a>.</p></div>' +
     '</div></section>';
@@ -1482,7 +1497,7 @@ function pageLegal() {
     '<li>SIRET : <span class="ph">SIRET À RENSEIGNER</span></li>' +
     '<li>Adresse : ' + esc(CONFIG.street) + ', ' + CONFIG.zip + ' ' + esc(CONFIG.city) + '</li>' +
     '<li>Téléphone : ' + CONFIG.phone + ' — ' + CONFIG.mobile + '</li>' +
-    '<li>Email : <span class="ph">EMAIL À RENSEIGNER</span></li>' +
+    '<li>Email : <a href="mailto:' + CONFIG.email + '">' + esc(CONFIG.email) + '</a></li>' +
     '<li>Responsable de la publication : <span class="ph">RESPONSABLE DE PUBLICATION À RENSEIGNER</span></li>' +
     '<li>TVA intracommunautaire : <span class="ph">TVA À RENSEIGNER</span></li>' +
     '<li>Assurance de responsabilité civile décennale : ' + (CONFIG.insurer ? esc(CONFIG.insurer) : '<span class="ph">ASSUREUR À RENSEIGNER</span>') + ' — contrat n° ' + (CONFIG.policyNumber ? esc(CONFIG.policyNumber) : '<span class="ph">N° DE CONTRAT À RENSEIGNER</span>') + '</li>' +
@@ -1491,7 +1506,7 @@ function pageLegal() {
     '<h2>Propriété intellectuelle</h2><p>L\'ensemble des contenus présents sur ce site (textes, photographies de chantier, logo) est la propriété de ' + esc(CONFIG.name) + ' ou de ses ayants droit. Toute reproduction sans autorisation écrite est interdite.</p>' +
     '<h2>Photographies</h2><p>Les photographies publiées dans la galerie correspondent à des chantiers réalisés par l\'entreprise. Aucune image d\'illustration n\'est présentée comme une réalisation.</p>' +
     '<h2>Litiges</h2><p>Le présent site est soumis au droit français. En cas de litige, les tribunaux compétents sont ceux du ressort du siège de l\'entreprise.</p>' +
-    '</div></section>';
+    '</div></section>' + devisSection();
 }
 
 function pagePrivacy() {
@@ -1500,18 +1515,18 @@ function pagePrivacy() {
     '<h2>Données collectées</h2><p>Le formulaire de contact collecte : prénom, nom, téléphone, email, type de projet et message. Ces informations sont transmises uniquement pour répondre à votre demande de devis ou d\'information.</p>' +
     '<h2>Finalité du traitement</h2><p>Les données servent exclusivement à traiter votre demande : rappel téléphonique, échange par email, préparation d\'une proposition. Elles ne sont ni vendues ni transmises à des tiers à des fins commerciales.</p>' +
     '<h2>Durée de conservation</h2><p>Durée de conservation : <span class="ph">DURÉE À DÉFINIR</span>. Elle sera précisée dès que la politique interne de l\'entreprise sera fixée.</p>' +
-    '<h2>Vos droits</h2><p>Conformément au RGPD, vous disposez d\'un droit d\'accès, de rectification, d\'effacement, de limitation et d\'opposition sur les données vous concernant. Pour l\'exercer, contactez l\'entreprise à l\'adresse <span class="ph">EMAIL À RENSEIGNER</span> ou par téléphone au ' + CONFIG.phone + '.</p>' +
+    '<h2>Vos droits</h2><p>Conformément au RGPD, vous disposez d\'un droit d\'accès, de rectification, d\'effacement, de limitation et d\'opposition sur les données vous concernant. Pour l\'exercer, contactez l\'entreprise à l\'adresse <a href="mailto:' + CONFIG.email + '">' + esc(CONFIG.email) + '</a> ou par téléphone au ' + CONFIG.phone + '.</p>' +
     '<h2>Cookies</h2><p>Ce site ne dépose aucun cookie de mesure d\'audience ni de traceur publicitaire. Si un outil de statistiques ou de marketing venait à être ajouté, une gestion du consentement serait mise en place au préalable.</p>' +
     '<h2>Hébergement</h2><p>Les données transitent par l\'hébergeur du site : <span class="ph">HÉBERGEUR À RENSEIGNER</span>.</p>' +
     '<h2>Contact</h2><p>Pour toute question relative à vos données : ' + CONFIG.phone + ' — ' + esc(CONFIG.street) + ', ' + CONFIG.zip + ' ' + esc(CONFIG.city) + '.</p>' +
-    '</div></section>';
+    '</div></section>' + devisSection();
 }
 
 function page404() {
   return '<section class="nf"><div class="wrap"><span class="eyebrow">Erreur 404</span>' +
     '<h1 style="margin-bottom:16px">Cette page n\'existe plus.</h1>' +
     '<p class="lead" style="margin:0 auto 28px">La page que vous recherchez a peut-être été déplacée ou renommée.</p>' +
-    '<div class="btn-row"><a class="btn btn--acc btn--lg" href="#/">Retour à l\'accueil</a>' + devisBtn("btn--out btn--lg", "Contacter AC Couvreur") + '</div></div></section>';
+    '<div class="btn-row"><a class="btn btn--acc btn--lg" href="#/">Retour à l\'accueil</a>' + devisBtn("btn--out btn--lg", "Contacter AC Couvreur") + '</div></div></section>' + devisSection();
 }
 
 /* ==========================================================================
@@ -1694,7 +1709,7 @@ function pageDrone() {
     '<div class="wrap cta__in"><div class="rv"><h2>Votre toiture mérite<span>une vérification précise.</span></h2>' +
     '<p class="lead" style="margin-top:18px">Demandez une vérification de votre toiture par drone et obtenez une première analyse visuelle de son état.</p>' +
     '<div class="btn-row" style="margin-top:26px">' + devisBtn("btn--acc btn--lg", "Demander une vérification") + telBtn("btn--out btn--lg") + '</div></div>' +
-    '<div class="infocard rv">' + infoLines() + '</div></div></section>';
+    '<div class="infocard rv">' + infoLines() + '</div></div></section>' + devisSection();
 }
 
 const PEINT_WORKS = [
@@ -1864,6 +1879,7 @@ function renderFooter() {
     '<li>' + esc(CONFIG.street) + '<br>' + CONFIG.zip + ' ' + esc(CONFIG.city) + '</li>' +
     '<li><a href="tel:' + CONFIG.phoneTel + '" style="font-family:var(--fd);font-weight:800;color:#fff">' + CONFIG.phone + '</a></li>' +
     '<li>' + esc(CONFIG.mobileLabel) + ' : <a href="tel:' + CONFIG.mobileTel + '">' + CONFIG.mobile + '</a></li>' +
+    (CONFIG.email ? '<li>Email : <a href="mailto:' + CONFIG.email + '">' + esc(CONFIG.email) + '</a></li>' : '') +
     '<li>Horaires : ' + (CONFIG.hours ? esc(CONFIG.hours) : '<span class="ph">À CONFIRMER</span>') + '</li>' +
     '<li style="margin-top:6px;color:var(--acc);font-family:var(--fd);font-weight:700;font-size:13px">Garantie décennale 10 ans</li></ul></div>' +
     '</div><div class="ftr__bot"><span>© ' + new Date().getFullYear() + ' ' + esc(CONFIG.name) + ' — Tous droits réservés.</span>' +
@@ -2101,9 +2117,9 @@ function lbMove(d) { lbShow((lbIdx + d + lbList.length) % lbList.length); }
 function bindForm() {
   const form = $("#devisForm"); if (!form) return;
   const notice = $("#formNotice"), ok = $("#formOk");
-  if (!CONFIG.formEndpoint) {
-    /* TODO — CONNECT CONTACT FORM BACKEND (Web3Forms, Formspree, Resend, Supabase, API...) */
-    notice.innerHTML = "<strong>Formulaire non connecté.</strong> Aucun service d'envoi n'est encore configuré : renseignez <code>CONFIG.formEndpoint</code> avant la mise en ligne. En attendant, l'appel au " + CONFIG.phone + " reste le canal actif.";
+  const ready = !!(CONFIG.formEndpoint && CONFIG.web3formsKey);
+  if (!ready) {
+    notice.innerHTML = "<strong>Formulaire bientôt actif.</strong> En attendant, appelez le " + CONFIG.phone + " ou écrivez à " + CONFIG.email + ".";
     notice.setAttribute("data-show", "1");
   }
   const fields = [
@@ -2126,17 +2142,28 @@ function bindForm() {
     let firstBad = null;
     fields.forEach(f => { if (!check(f) && !firstBad) firstBad = $("#" + f.id); });
     if (firstBad) { firstBad.focus(); return; }
-    if (!CONFIG.formEndpoint) {
-      ok.textContent = "Votre demande est complète, mais l'envoi n'est pas encore activé sur ce site. Appelez le " + CONFIG.phone + " pour transmettre votre projet.";
+    if (!ready) {
+      ok.textContent = "Votre demande est complète, mais l'envoi n'est pas encore activé sur ce site. Appelez le " + CONFIG.phone + " ou écrivez à " + CONFIG.email + ".";
       ok.className = "alert alert--warn"; ok.setAttribute("data-show", "1"); return;
     }
     const btn = $("button[type=submit]", form); btn.disabled = true; btn.textContent = "Envoi en cours...";
     try {
+      const data = Object.fromEntries(new FormData(form).entries());
+      if (data.botcheck) return; /* robot détecté : aucun envoi */
+      delete data.botcheck;
+      const payload = Object.assign({
+        access_key: CONFIG.web3formsKey,
+        subject: "Nouvelle demande de devis : " + (data.projet || "Travaux") + " (" + data.prenom + " " + data.nom + ")",
+        from_name: CONFIG.name + " - site internet",
+        replyto: data.email,
+        page: location.href
+      }, data);
       const res = await fetch(CONFIG.formEndpoint, {
         method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(Object.fromEntries(new FormData(form).entries()))
+        body: JSON.stringify(payload)
       });
-      if (!res.ok) throw new Error("HTTP " + res.status);
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || json.success === false) throw new Error(json.message || ("HTTP " + res.status));
       form.reset();
       ok.textContent = "Merci, votre demande a bien été envoyée. Vous serez recontacté pour préciser votre projet.";
       ok.className = "alert alert--ok"; ok.setAttribute("data-show", "1");
